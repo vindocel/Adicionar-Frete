@@ -180,42 +180,53 @@
     }
     @keyframes pulseDot { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
     @keyframes pulseHalo { 0%{transform:scale(1);opacity:.4} 70%,100%{transform:scale(2.6);opacity:0} }
+    /* Pulsar mais suave só para o coração */
+    @keyframes heartPulse {
+      0%,100% { transform: scale(1); }
+      50%     { transform: scale(1.01); }  /* ↓ amplitude (antes ~1.12) */
+    }
+    @keyframes heartHalo {
+      0%      { transform: scale(1); opacity: .24; }
+      70%,100%{ transform: scale(2.2); opacity: 0; } /* ↓ “halo” (antes ~2.6) */
+    }
+
     @media (prefers-reduced-motion: reduce) {
-      .group-banner .dot,.group-banner .dot::after { animation: none; }
+      .group-banner .dot,.group-banner .dot::after,
+      .footer .heart, .footer .heart::after { animation: none; }
     }
     .group-banner .text { font-weight: 700; color: var(--banner-text); }
 
     /* Cards de frete (compactos quando fechados) */
     .frete-grid {
       display: grid;
-      gap: 10px;                                  /* ↓ menor espaço */
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* ↓ colunas mais estreitas */
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     }
     details.frete-item { border: 1px solid var(--border); border-radius: 14px; background: var(--card); padding: 0; overflow: clip; transition: box-shadow .2s, border-color .25s, background-color .25s; }
     details.frete-item[open] { grid-column: 1 / -1; box-shadow: var(--shadow); }
     .frete-summary {
       list-style: none; outline: none; cursor: pointer; user-select: none;
-      display: flex; align-items: center; gap: 6px;       /* ↓ gap */
-      padding: 4px 6px;                                   /* ↓ padding */
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 6px;
       border-bottom: 1px dashed var(--dashed);
-      min-height: 40px;                                   /* ↓ altura */
+      min-height: 40px;
     }
     .frete-summary::-webkit-details-marker { display: none; }
     .frete-summary .caret { opacity: .7; transition: transform .2s ease; font-size: 14px; }
     details[open] .frete-summary .caret { transform: rotate(180deg); }
     .frete-tag {
       flex: 1 1 auto; text-align: center; font-weight: 800; color: var(--text-strong);
-      padding: 8px 10px;                                   /* ↓ padding */
+      padding: 8px 10px;
       border-radius: 10px; border: 1px solid var(--tag-border);
       background: var(--tag-bg); margin: 4px 0; white-space: nowrap;
     }
 
-    /* contador compacto: só número fechado; completa no aberto */
+    /* contador compacto */
     .frete-count {
-      display: inline-block;               /* sempre visível */
+      display: inline-block;
       font-size: 12px;
       line-height: 1;
-      padding: 2px 6px;                    /* ↓ pílula menor */
+      padding: 2px 6px;
       border: 1px solid var(--tag-border);
       border-radius: 999px;
       background: color-mix(in oklab, var(--card) 92%, #0000);
@@ -223,7 +234,7 @@
       opacity: .7;
     }
     details[open] .frete-count::after {
-      content: " " attr(data-label);       /* “bairro(s)” vem do JS */
+      content: " " attr(data-label);
       opacity: .9;
       margin-left: 2px;
     }
@@ -259,7 +270,35 @@
     textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 75%); }
     #in.is-clickpaste:hover { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent), transparent 65%); cursor: pointer; }
 
-    .footer { opacity: .7; font-size: 13px; margin-top: 16px; text-align: center; color: var(--muted); }
+    /* ===== Rodapé com espaçamento e coração pulsante ===== */
+    .footer {
+      opacity: .7;
+      font-size: 13px;
+      margin: 16px 0 8px;          /* metade embaixo */
+      text-align: center;
+      color: var(--muted);
+    }
+    .footer .heart{
+      display: inline-block;
+      width: 14px; height: 14px;
+      margin-left: 6px;
+      vertical-align: -2px;
+      position: relative;
+      color: var(--banner-dot);              /* mesma cor da bolinha */
+      animation: heartPulse 2.0s ease-in-out infinite;
+    }
+    .footer .heart::after{
+      content: "";
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: var(--banner-dot);
+      opacity: .28;
+      filter: blur(2px);
+      z-index: -1;
+      animation: heartHalo 2.0s ease-out infinite;
+    }
+    .footer .heart svg{ width: 14px; height: 14px; display:block; fill: currentColor; }
 
     /* ===== Toggle minimalista (inversor de tema) ===== */
     .theme-top-right{
@@ -353,7 +392,7 @@
       <!-- Texto de entrada -->
       <div class="section">
         <div class="row" style="align-items:center; justify-content: space-between;">
-          <label class="block" for="in">Texto original</label>
+          <label class="block" for="in">Texto do Pedido</label>
           <label class="row" style="gap:8px; align-items:center;">
             <input type="checkbox" id="autoPasteToggle" />
             <span class="hint">Colar automaticamente ao clicar</span>
@@ -377,7 +416,7 @@
 
       <!-- Saída -->
       <div class="section">
-        <label class="block" for="out">Texto tratado</label>
+        <label class="block" for="out">Texto com Frete</label>
         <textarea id="out" spellcheck="false" placeholder="O resultado aparecerá aqui" readonly></textarea>
         <div class="section row">
           <button id="btnCopy" class="btn">Copiar resultado</button>
@@ -385,15 +424,21 @@
       </div>
     </div>
 
-    <div class="footer">Simplificador de Vida. By: Victor Matos</div>
+    <div class="footer">
+      Simplificador de Vida. By: Victor Matos
+      <span class="heart" aria-label="feito com carinho" title="Feito com carinho">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 6.5 3.5 5 5.5 5c1.54 0 3.04.99 3.57 2.36h1.87C12.46 5.99 13.96 5 15.5 5c2 0 3.5 1.5 3.5 3.5 0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      </span>
+    </div>
   </div>
 
   <script>
-    // ======== Tema: inicia seguindo o sistema e o botão INVERTE ========
+    // ======== Tema ========
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
     const btnTheme = document.getElementById('btnTheme');
 
-    // começa seguindo o sistema; ao clicar, deixa de seguir até recarregar
     let followSystem = true;
     let currentTheme = prefersDark.matches ? 'dark' : 'light';
 
@@ -402,25 +447,21 @@
       document.body.style.colorScheme = theme;
       btnTheme.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
     }
-
-    // aplica tema inicial (do sistema)
     applyTheme(currentTheme);
 
-    // acompanha mudanças do sistema enquanto não houver clique
     prefersDark.addEventListener('change', (e) => {
       if(!followSystem) return;
       currentTheme = e.matches ? 'dark' : 'light';
       applyTheme(currentTheme);
     });
 
-    // clique = inversor de cor (sem salvar preferência)
     btnTheme.addEventListener('click', () => {
       followSystem = false;
       currentTheme = (currentTheme === 'dark') ? 'light' : 'dark';
       applyTheme(currentTheme);
     });
 
-    // ============== APP (restante do seu código) ==============
+    // ============== APP ==============
     const BAIRROS_POR_FRETE = {
       "3,00": ["Cariacica Sede","Alice Coutinho","Antonio Ferreira Borges","Prolar","São João Batista","Vila Merlo","Morrinhos","Morro Novo","Mangueiras","Nova Republica","Andorinhas","Areinha"],
       "4,00": ["Ibiapaba","Santa Luzia","Montanha da Esperança","Limão"],
@@ -472,7 +513,6 @@
         const caret = document.createElement('span'); caret.className = 'caret'; caret.textContent = '▾';
         const tag = document.createElement('div'); tag.className = 'frete-tag'; tag.textContent = `R$ ${v}`;
 
-        // contador compacto (só número fechado; “bairro(s)” ao abrir)
         const qtd = (BAIRROS_POR_FRETE[v] ?? []).length;
         const count = document.createElement('span');
         count.className = 'frete-count';
@@ -552,7 +592,7 @@
       const totalAtual = toNumberBRL(totalMatch[1]);
       if (!Number.isFinite(totalAtual)) throw new Error('Valor de "Total do pedido" inválido.');
       const novoTotal = totalAtual + valorFreteBR;
-      const freteLinha = `  *Frete    .......................: ${toBRL(valorFreteBR)}*`;
+      const freteLinha = `  Frete    .......................: ${toBRL(valorFreteBR)}`;
       if (descontosIdx !== -1) { filtradas.splice(descontosIdx + 1, 0, freteLinha); if (descontosIdx + 1 <= totalIdx) totalIdx++; }
       else { filtradas.splice(totalIdx, 0, freteLinha); totalIdx++; }
       filtradas[totalIdx] = filtradas[totalIdx].replace(/R\$\s*[\d\.\,]+/i, toBRL(novoTotal));
@@ -624,4 +664,3 @@
   </script>
 </body>
 </html>
-
