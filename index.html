@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Adicionar Frete ao Pedido</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Faz componentes nativos (inputs/scrollbars) seguirem o tema -->
+  <meta name="color-scheme" content="light dark" />
+  <!-- Barra do navegador (Android/Chrome) com cor por tema -->
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0b0c">
+  <style>
+    /* =========================
+       PALETA (tema automático)
+       ========================= */
+    :root {
+      /* Light */
+      --bg: #f7f8fb;
+      --card: #ffffff;
+      --border: #e6e8ef;
+      --dashed: #e5e7eb;
+      --text: #0f172a;
+      --text-strong: #0b1220;
+      --text-on-accent: #ffffff;
+      --muted: #64748b;
+
+      --accent: #2563eb;        /* btn primário */
+      --accent-600: #1d4ed8;    /* hover */
+
+      --chip-bg: #f3f4f6;
+      --chip-border: #d1d5db;
+      --chip-selected-bg: #dbeafe;
+      --chip-selected-border: #93c5fd;
+
+      --input-bg: #f8fafc;
+      --tag-bg: #f3f4f8;
+      --tag-border: #dfe3ea;
+
+      --banner-bg: #fff1f2;
+      --banner-border: #fecaca;
+      --banner-dot: #ef4444;
+      --banner-text: #991b1b;
+
+      --ok: #16a34a;
+      --err: #dc2626;
+
+      --shadow: 0 8px 24px rgba(15, 23, 42, .08);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b0b0c;
+        --card: #151518;
+        --border: #2a2a2e;
+        --dashed: #2a2a2e;
+        --text: #e8e8ea;
+        --text-strong: #f6f7fb;
+        --text-on-accent: #ffffff;
+        --muted: #a2a2aa;
+
+        --accent: #5e82ff;
+        --accent-600: #5173ee;
+
+        --chip-bg: #23232a;
+        --chip-border: #3a3a44;
+        --chip-selected-bg: #2f3342;
+        --chip-selected-border: #7da0ff;
+
+        --input-bg: #0f0f13;
+        --tag-bg: #202027;
+        --tag-border: #353540;
+
+        --banner-bg: #1b1717;
+        --banner-border: #573434;
+        --banner-dot: #ff7777;
+        --banner-text: #ffd4d4;
+
+        --ok: #7dffa1;
+        --err: #ff7d8a;
+
+        --shadow: 0 8px 30px rgba(0,0,0,.25);
+      }
+    }
+
+    /* bolinha com pulso suave + halo */
+    .group-banner .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--banner-dot);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--banner-dot), transparent 80%);
+    position: relative;            /* para o ::after */
+    z-index: 1;
+    animation: pulseDot 1.8s ease-in-out infinite;
+    }
+
+    /* halo que expande e desvanece */
+    .group-banner .dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--banner-dot);
+    opacity: .40;
+    transform: scale(1);
+    filter: blur(.2px);            /* deixa o halo mais macio */
+    z-index: -1;
+    animation: pulseHalo 1.8s ease-out infinite;
+    }
+
+    /* animações */
+    @keyframes pulseDot {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.12); }
+    }
+
+    @keyframes pulseHalo {
+    0%   { transform: scale(1);   opacity: .40; }
+    70%  { transform: scale(2.6); opacity: 0;   }
+    100% { transform: scale(2.6); opacity: 0;   }
+    }
+
+    /* acessibilidade: desliga a animação se o usuário preferir menos movimento */
+    @media (prefers-reduced-motion: reduce) {
+    .group-banner .dot,
+    .group-banner .dot::after {
+        animation: none;
+    }
+    }
+
+
+    /* =========================
+       BASE
+       ========================= */
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0; padding: 24px;
+      font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: var(--bg); color: var(--text);
+      color-scheme: light dark;   /* faz inputs/scrollbars seguirem o tema */
+      transition: background-color .25s ease, color .25s ease;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; }
+    h1 { font-size: 22px; margin: 0 0 18px; color: var(--text-strong); }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px; padding: 18px;
+      box-shadow: var(--shadow);
+      transition: background-color .25s ease, border-color .25s ease;
+    }
+    .section { margin-top: 18px; }
+    label.block { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-strong); }
+    .hint { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+    .row { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+    .row-right { margin-left: auto; }
+    .ok { color: var(--ok); font-weight: 700; }
+    .err { color: var(--err); font-weight: 700; }
+
+    /* Botões */
+    .btn {
+      padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border);
+      background: color-mix(in oklab, var(--card) 85%, #0000);
+      color: var(--text); font-weight: 700; cursor: pointer;
+      transition: background .2s, transform .06s, border-color .2s, color .2s;
+      white-space: nowrap;
+    }
+    .btn:hover { background: color-mix(in oklab, var(--card) 70%, #0000); transform: translateY(-1px); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--text-on-accent); box-shadow: 0 6px 18px color-mix(in srgb, var(--accent), transparent 70%); }
+    .btn.primary:hover { background: var(--accent-600); }
+    .btn.ghost { background: transparent; }
+
+    /* Busca */
+    .search-wrap { margin-bottom: 12px; }
+    .search-row { display: flex; gap: 10px; align-items: center; }
+    .search-input {
+      flex: 1 1 auto; padding: 10px 12px; border-radius: 10px;
+      background: var(--input-bg); color: var(--text); border: 1px solid var(--border);
+      font-size: 14px; transition: border-color .2s, box-shadow .2s;
+    }
+    .search-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 75%); }
+    .search-results {
+      margin-top: 10px;
+      display: flex; flex-wrap: wrap; gap: 8px;
+      border: 1px dashed var(--dashed); border-radius: 10px; padding: 10px;
+      background: color-mix(in oklab, var(--card) 94%, #0000);
+    }
+    .empty { color: var(--muted); font-size: 13px; }
+
+    /* Agrupamentos */
+    .group { margin-top: 14px; }
+    .group-title { font-size: 14px; letter-spacing: .3px; text-transform: uppercase; margin: 16px 2px 10px; font-weight: 800; color: var(--text-strong); }
+    .group-banner {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--banner-bg); border: 1px solid var(--banner-border); border-radius: 12px;
+      padding: 10px 12px; margin: 8px 0 12px;
+    }
+    .group-banner .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--banner-dot); box-shadow: 0 0 0 4px color-mix(in srgb, var(--banner-dot), transparent 80%); }
+    .group-banner .text { font-weight: 700; color: var(--banner-text); }
+
+    /* Cards de frete (compactos quando fechados) */
+    .frete-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    details.frete-item { border: 1px solid var(--border); border-radius: 14px; background: var(--card); padding: 0; overflow: clip; transition: box-shadow .2s ease, border-color .25s ease, background-color .25s ease; }
+    details.frete-item[open] { grid-column: 1 / -1; box-shadow: var(--shadow); }
+    .frete-summary { list-style: none; outline: none; cursor: pointer; user-select: none; display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-bottom: 1px dashed var(--dashed); min-height: 44px; }
+    .frete-summary::-webkit-details-marker { display: none; }
+    .frete-summary .caret { opacity: .7; transition: transform .2s ease; font-size: 14px; }
+    details[open] .frete-summary .caret { transform: rotate(180deg); }
+    .frete-tag {
+      flex: 1 1 auto; text-align: center; font-weight: 800; color: var(--text-strong);
+      padding: 10px 12px; border-radius: 10px; border: 1px solid var(--tag-border);
+      background: var(--tag-bg); margin: 4px 0; white-space: nowrap;
+    }
+    .frete-count { display: none; opacity: .7; font-size: 12px; padding: 2px 8px; border: 1px solid var(--tag-border); border-radius: 999px; background: color-mix(in oklab, var(--card) 92%, #0000); white-space: nowrap; }
+    @media (min-width: 980px) { .frete-count { display: inline-block; } }
+    .frete-content { padding: 10px; }
+
+    /* Chips */
+    .chips-list { display: flex; flex-wrap: wrap; gap: 8px; border: 1px dashed var(--dashed); border-radius: 10px; padding: 10px; background: color-mix(in oklab, var(--card) 94%, #0000); }
+    .chip {
+      padding: 6px 12px; border-radius: 999px;
+      background: var(--chip-bg); border: 1px solid var(--chip-border);
+      font-size: 13px; white-space: nowrap; cursor: pointer; user-select: none;
+      color: var(--text-strong);
+      transition: transform .06s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease, color .2s;
+    }
+    .chip:hover:not([disabled]) { transform: translateY(-1px); }
+    .chip[aria-pressed="true"] {
+      background: var(--chip-selected-bg); border-color: var(--chip-selected-border);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent), transparent 45%), 0 6px 20px color-mix(in srgb, var(--accent), transparent 82%);
+      font-weight: 700; color: var(--text-strong);
+    }
+    .chip[disabled] { opacity: .5; cursor: not-allowed; }
+    .chip .meta { margin-left: 8px; font-size: 12px; opacity: .8; padding: 2px 8px; border: 1px solid var(--chip-border); border-radius: 999px; background: color-mix(in oklab, var(--card) 90%, #0000); }
+
+    /* Textareas */
+    textarea {
+      width: 100%; min-height: 190px; resize: vertical; padding: 12px 14px;
+      background: var(--input-bg); color: var(--text); border: 1px solid var(--border); border-radius: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 14px; transition: box-shadow .15s ease, border-color .15s ease, background-color .25s ease, color .25s ease;
+    }
+    textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 75%); }
+    #in.is-clickpaste:hover { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent), transparent 65%); cursor: pointer; }
+
+    .footer { opacity: .7; font-size: 13px; margin-top: 16px; text-align: center; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Adicionar Frete ao Pedido</h1>
+
+    <div class="card">
+      <!-- BUSCA -->
+      <div class="section search-wrap">
+        <label class="block" for="search">Buscar bairro</label>
+        <div class="search-row">
+          <input id="search" class="search-input" type="text" placeholder="Digite parte do nome (ex.: 'rosa', 'nova', 'sant...')" />
+          <button id="btnSearchClear" class="btn ghost" title="Limpar busca">Limpar</button>
+        </div>
+        <div id="searchResults" class="search-results">
+          <span class="empty">Resultados da busca aparecem aqui.</span>
+        </div>
+        <div class="hint" id="selHint">Nenhum bairro selecionado.</div>
+      </div>
+
+      <!-- Seleção por bairro (cards compactos; expandem ao clicar) -->
+      <div class="section">
+        <label class="block">Ou selecione pelo valor e escolha o bairro:</label>
+
+        <!-- Grupo: Fretes padrão -->
+        <div class="group" role="region" aria-label="Fretes padrão">
+          <div class="group-title">Fretes Padrão</div>
+          <div class="frete-grid" id="gridPadrao"></div>
+        </div>
+
+        <!-- Grupo: Mediante aprovação gerencial -->
+        <div class="group" role="region" aria-label="Fretes mediante aprovação gerencial">
+          <div class="group-banner" aria-live="polite">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="text">Mediante Aprovação Gerencial</span>
+          </div>
+          <div class="frete-grid" id="gridAprov"></div>
+        </div>
+      </div>
+
+      <!-- Texto de entrada -->
+      <div class="section">
+        <div class="row" style="align-items:center; justify-content: space-between;">
+          <label class="block" for="in">Texto original</label>
+          <label class="row" style="gap:8px; align-items:center;">
+            <input type="checkbox" id="autoPasteToggle" />
+            <span class="hint">Colar automaticamente ao clicar</span>
+          </label>
+        </div>
+
+        <div class="row">
+          <button id="btnPaste" class="btn">Colar Pedido</button>
+          <div id="status" class="row-right"></div>
+        </div>
+
+        <textarea id="in" spellcheck="false" placeholder="Cole aqui o texto (ex.: o bloco com Produtos, Descontos e Total do pedido)" title="Clique para colar automaticamente do clipboard"></textarea>
+      </div>
+
+      <!-- Ações principais -->
+      <div class="section row">
+        <button id="btnAdd" class="btn primary">Adicionar frete</button>
+        <button id="btnClear" class="btn ghost" title="Limpar campos">Limpar</button>
+        <div id="copyState" class="hint"></div>
+      </div>
+
+      <!-- Saída -->
+      <div class="section">
+        <label class="block" for="out">Texto tratado</label>
+        <textarea id="out" spellcheck="false" placeholder="O resultado aparecerá aqui" readonly></textarea>
+        <div class="section row">
+          <button id="btnCopy" class="btn">Copiar resultado</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">Simplificador de Vida. By: Victor Matos</div>
+  </div>
+
+  <script>
+    // ================= ZONA DE DADOS — Bairros por frete =================
+    const BAIRROS_POR_FRETE = {
+      "3,00": ["Cariacica Sede","Alice Coutinho","Antonio Ferreira Borges","Prolar","São João Batista","Vila Merlo","Morrinhos","Morro Novo","Mangueiras","Nova Republica","Andorinhas","Areinha"],
+      "4,00": ["Ibiapaba","Santa Luzia","Montanha da Esperança","Limão"],
+      "5,00": ["Vila Progresso","Nova Esperança","Porto Belo","Porto de Cariacica","Planeta","Santo Antonio","Campo Verde","Bubu","Vale do Moxuara"],
+      "7,00": ["Vila Prudêncio","Tabajara","Santana","Cangaíba","Maricará","Graúna","Sítio Junato","Padre Mathias","Pica Pau","Nova Rosa da Penha","Nova Rosa da Penha II"],
+      "8,00": ["Duas Bocas"],
+      "13,00": ["Morro do Óleo","São Francisco","Campo Grande","Tutum","Porto de Santana","Presidente Médici","Itacibá","Marcilio de Noronha","Canaã","3 Pontes","Cachoeirinha"],
+      "15,00": ["Mangaraí"],
+      "20,00": ["Santa Leopoldinha"]
+    };
+
+    // -------- Utilidades/helpers --------
+    const brlFmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+    const toNumberBRL = (str) => { const clean = String(str ?? '').replace(/[^\d.,]/g, '').replace(/\./g, '').replace(',', '.'); const n = parseFloat(clean); return Number.isFinite(n) ? n : NaN; };
+    const toBRL = (num) => brlFmt.format(num);
+    const norm = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    const safeId = (v) => `frete-${v.replace(',', '_')}`;
+    const isFileProtocol = location.protocol === 'file:';
+
+    const FRETES_TODOS = ["3,00","4,00","5,00","7,00","8,00","13,00","15,00","20,00"];
+    const FRETES_APROVACAO = ["13,00","15,00","20,00"];
+    const FRETES_PADRAO = FRETES_TODOS.filter(v => !FRETES_APROVACAO.includes(v));
+
+    const gridPadrao = document.getElementById('gridPadrao');
+    const gridAprov  = document.getElementById('gridAprov');
+    const selHint    = document.getElementById('selHint');
+
+    const searchInput   = document.getElementById('search');
+    const btnSearchClr  = document.getElementById('btnSearchClear');
+    const searchResults = document.getElementById('searchResults');
+
+    const inEl   = document.getElementById('in');
+    const outEl  = document.getElementById('out');
+    const btnAdd = document.getElementById('btnAdd');
+    const btnClr = document.getElementById('btnClear');
+    const btnCpy = document.getElementById('btnCopy');
+    const btnPaste = document.getElementById('btnPaste');
+    const status = document.getElementById('status');
+    const copySt = document.getElementById('copyState');
+    const autoPasteToggle = document.getElementById('autoPasteToggle');
+
+    function setStatus(msg, isErr=false) { status.textContent = msg || ''; status.className = isErr ? 'err' : (msg ? 'ok' : ''); }
+
+    // ----- Renderização dos cards (colapsáveis por valor)
+    function renderGrid(container, listaFretes) {
+      container.innerHTML = '';
+      listaFretes.forEach(v => {
+        const det = document.createElement('details'); det.className = 'frete-item'; det.id = safeId(v); det.open = false;
+        const sum = document.createElement('summary'); sum.className = 'frete-summary';
+        const caret = document.createElement('span'); caret.className = 'caret'; caret.textContent = '▾';
+        const tag = document.createElement('div'); tag.className = 'frete-tag'; tag.textContent = `R$ ${v}`;
+        const count = document.createElement('span'); count.className = 'frete-count'; count.textContent = `${(BAIRROS_POR_FRETE[v] ?? []).length} bairros`;
+        sum.appendChild(caret); sum.appendChild(tag); sum.appendChild(count);
+
+        const content = document.createElement('div'); content.className = 'frete-content';
+        const list = document.createElement('div'); list.className = 'chips-list';
+        (BAIRROS_POR_FRETE[v] ?? []).forEach(nome => {
+          const chip = document.createElement('button'); chip.type = 'button'; chip.className = 'chip'; chip.textContent = nome;
+          chip.setAttribute('aria-pressed', 'false'); chip.dataset.frete = v; chip.dataset.freteNumber = toNumberBRL(v); chip.dataset.nome = nome; chip.addEventListener('click', onChipClick);
+          list.appendChild(chip);
+        });
+        content.appendChild(list);
+
+        det.appendChild(sum); det.appendChild(content); container.appendChild(det);
+      });
+    }
+
+    // ----- Índice de busca
+    const INDEX = [];
+    Object.entries(BAIRROS_POR_FRETE).forEach(([freteStr, bairros]) => {
+      const freteNum = toNumberBRL(freteStr);
+      const grupo = FRETES_APROVACAO.includes(freteStr) ? 'aprov' : 'padrao';
+      bairros.forEach(nome => INDEX.push({ nome, key: norm(nome), freteStr, freteNum, grupo }));
+    });
+
+    function openFreteCard(freteStr) { const el = document.getElementById(safeId(freteStr)); if (el && !el.open) el.open = true; return el; }
+
+    function renderSearchResults(matches) {
+      searchResults.innerHTML = '';
+      if (!matches.length) { const span = document.createElement('span'); span.className = 'empty'; span.textContent = 'Nenhum bairro encontrado.'; searchResults.appendChild(span); return; }
+      matches.forEach(item => {
+        const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'chip';
+        btn.innerHTML = `${item.nome} <span class="meta">R$ ${item.freteStr}${item.grupo==='aprov'?' · aprovação':''}</span>`;
+        btn.addEventListener('click', () => selectFromIndex(item));
+        searchResults.appendChild(btn);
+      });
+    }
+
+    let selectedFrete = null, selectedBairro = null;
+    function selectFromIndex(entry) {
+      selectedFrete = Number(entry.freteNum); selectedBairro = entry.nome;
+      const card = openFreteCard(entry.freteStr);
+      document.querySelectorAll('.chip').forEach(c => { const active = c.dataset.nome === entry.nome && c.dataset.frete === entry.freteStr; c.setAttribute('aria-pressed', active ? 'true' : 'false'); c.disabled = !active; });
+      if (card) { const target = card.querySelector(`.chip[data-nome="${CSS.escape(entry.nome)}"][data-frete="${CSS.escape(entry.freteStr)}"]`); if (target) target.focus({ preventScroll: false }); card.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+      updateSelectionHint(); setStatus('');
+    }
+    function onChipClick(ev) {
+      const chip = ev.currentTarget; const isActive = chip.getAttribute('aria-pressed') === 'true';
+      if (isActive) { chip.setAttribute('aria-pressed', 'false'); selectedFrete = null; selectedBairro = null; document.querySelectorAll('.chip').forEach(c => c.disabled = false); updateSelectionHint(); setStatus(''); }
+      else { document.querySelectorAll('.chip').forEach(c => { const active = c === chip; c.setAttribute('aria-pressed', active ? 'true' : 'false'); c.disabled = !active; }); selectedFrete = Number(chip.dataset.freteNumber); selectedBairro = chip.dataset.nome; updateSelectionHint(); setStatus(''); }
+    }
+    function updateSelectionHint() { selHint.innerHTML = (selectedBairro && Number.isFinite(selectedFrete)) ? `Selecionado: <strong>${selectedBairro}</strong> (frete ${toBRL(selectedFrete)})` : 'Nenhum bairro selecionado.'; }
+
+    function doSearch() { const q = norm(searchInput.value); if (!q) { searchResults.innerHTML = '<span class="empty">Resultados da busca aparecem aqui.</span>'; return; } const matches = INDEX.filter(x => x.key.includes(q)).slice(0, 50); renderSearchResults(matches); }
+    searchInput.addEventListener('input', doSearch);
+    btnSearchClr.addEventListener('click', () => { searchInput.value = ''; doSearch(); searchInput.focus(); });
+
+    // -------- Processamento do texto --------
+    function inserirOuAtualizarFrete(texto, valorFreteBR) {
+      if (!Number.isFinite(valorFreteBR)) throw new Error('Frete inválido.');
+      const linhas = texto.split(/\r?\n/);
+      let descontosIdx = -1; const filtradas = [];
+      for (let i = 0; i < linhas.length; i++) { const line = linhas[i]; if (/^\s*Descontos\b/i.test(line)) descontosIdx = filtradas.length; if (/^\s*Frete\b/i.test(line)) continue; filtradas.push(line); }
+      let totalIdx = filtradas.findIndex(l => /Total do pedido\b/i.test(l)); if (totalIdx === -1) throw new Error('Não encontrei a linha "Total do pedido".');
+      const totalMatch = filtradas[totalIdx].match(/R\$\s*([\d\.\,]+)/i); if (!totalMatch) throw new Error('Não consegui ler o valor de "Total do pedido".');
+      const totalAtual = toNumberBRL(totalMatch[1]); if (!Number.isFinite(totalAtual)) throw new Error('Valor de "Total do pedido" inválido.');
+      const novoTotal = totalAtual + valorFreteBR; const freteLinha = `  Frete    .......................: ${toBRL(valorFreteBR)}`;
+      if (descontosIdx !== -1) { filtradas.splice(descontosIdx + 1, 0, freteLinha); if (descontosIdx + 1 <= totalIdx) totalIdx++; } else { filtradas.splice(totalIdx, 0, freteLinha); totalIdx++; }
+      filtradas[totalIdx] = filtradas[totalIdx].replace(/R\$\s*[\d\.\,]+/i, toBRL(novoTotal));
+      return filtradas.join('\n');
+    }
+
+    btnAdd.addEventListener('click', () => {
+      copySt.textContent = '';
+      try {
+        if (!Number.isFinite(selectedFrete)) { setStatus('Escolha um bairro (o frete é calculado automaticamente).', true); return; }
+        const src = inEl.value.trim(); if (!src) { setStatus('Cole o texto original primeiro.', true); return; }
+        const tratado = inserirOuAtualizarFrete(src, selectedFrete); outEl.value = tratado; setStatus('Frete aplicado com sucesso!');
+      } catch (e) { setStatus(e.message || 'Erro ao processar.', true); }
+    });
+
+    btnClear.addEventListener('click', () => {
+      inEl.value = ''; outEl.value = ''; copySt.textContent = ''; setStatus('');
+      selectedFrete = null; selectedBairro = null; document.querySelectorAll('.chip').forEach(c => { c.disabled = false; c.setAttribute('aria-pressed','false'); }); updateSelectionHint();
+      inEl.classList.toggle('is-clickpaste', autoPasteEnabled);
+    });
+
+    btnCpy.addEventListener('click', async () => {
+      const val = outEl.value; if (!val.trim()) { copySt.textContent = 'Nada para copiar.'; return; }
+      try { await navigator.clipboard.writeText(val); copySt.textContent = 'Copiado!'; } catch { outEl.select(); document.execCommand('copy'); copySt.textContent = 'Copiado!'; }
+    });
+
+    // ======= Colagem: toggle + botão + clique controlados =======
+    const isSecure = window.isSecureContext;
+    let autoPasteEnabled = localStorage.getItem('autoPaste') === '1';
+    let autoPasteTriedThisSession = false;
+    autoPasteToggle.checked = autoPasteEnabled;
+    if (autoPasteEnabled) inEl.classList.add('is-clickpaste');
+
+    async function requestClipboardOnce() {
+      if (navigator.permissions && isSecure) {
+        try { const p = await navigator.permissions.query({ name: 'clipboard-read' }); if (p.state === 'granted') return true; } catch {}
+      }
+      try { await navigator.clipboard.readText(); return true; }
+      catch { return false; }
+    }
+
+    autoPasteToggle.addEventListener('change', async () => {
+      if (autoPasteToggle.checked) {
+        const ok = await requestClipboardOnce();
+        if (ok) { autoPasteEnabled = true; localStorage.setItem('autoPaste','1'); inEl.classList.add('is-clickpaste'); setStatus('Colagem automática ativada.'); }
+        else { autoPasteToggle.checked = false; autoPasteEnabled = false; localStorage.setItem('autoPaste','0'); setStatus(isFileProtocol ? 'Para a permissão lembrar, prefira abrir via http://localhost.' : 'Permissão negada. Não consegui ativar.', true); }
+      } else { autoPasteEnabled = false; localStorage.setItem('autoPaste','0'); inEl.classList.remove('is-clickpaste'); setStatus('Colagem automática desativada.'); }
+    });
+
+    btnPaste.addEventListener('click', async () => {
+      try { const txt = await navigator.clipboard.readText(); if (txt && txt.trim()) { inEl.value = txt; setStatus('Texto colado.'); } else setStatus('A área de transferência está vazia.', true); }
+      catch { setStatus('Sem permissão para ler o clipboard. Autorize quando o navegador pedir.', true); }
+    });
+
+    inEl.addEventListener('click', async () => {
+      if (!autoPasteEnabled || autoPasteTriedThisSession) return;
+      if (inEl.value.trim() !== '') return;
+      autoPasteTriedThisSession = true;
+      const ok = await requestClipboardOnce();
+      if (ok) { try { const txt = await navigator.clipboard.readText(); if (txt && txt.trim()) { inEl.value = txt; setStatus('Texto colado da área de transferência.'); } } catch {} }
+      else if (isFileProtocol) setStatus('Para não pedir permissão toda hora, abra via http://localhost.', true);
+    });
+
+    // Render inicial
+    renderGrid(gridPadrao, FRETES_PADRAO);
+    renderGrid(gridAprov, FRETES_APROVACAO);
+
+    // Busca
+    inEl.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); btnAdd.click(); } });
+  </script>
+</body>
+</html>
