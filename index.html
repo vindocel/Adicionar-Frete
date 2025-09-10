@@ -4,9 +4,7 @@
   <meta charset="utf-8" />
   <title>Adicionar Frete ao Pedido</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Faz componentes nativos (inputs/scrollbars) seguirem o tema -->
   <meta name="color-scheme" content="light dark" />
-  <!-- Barra do navegador (Android/Chrome) com cor por tema -->
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0b0c">
   <style>
@@ -24,8 +22,8 @@
       --text-on-accent: #ffffff;
       --muted: #64748b;
 
-      --accent: #2563eb;        /* btn primário */
-      --accent-600: #1d4ed8;    /* hover */
+      --accent: #2563eb;
+      --accent-600: #1d4ed8;
 
       --chip-bg: #f3f4f6;
       --chip-border: #d1d5db;
@@ -80,53 +78,23 @@
         --shadow: 0 8px 30px rgba(0,0,0,.25);
       }
     }
-
-    /* bolinha com pulso suave + halo */
-    .group-banner .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--banner-dot);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--banner-dot), transparent 80%);
-    position: relative;            /* para o ::after */
-    z-index: 1;
-    animation: pulseDot 1.8s ease-in-out infinite;
+    /* ====== Override manual (vence o @media) ====== */
+    :root[data-theme="light"] {
+      --bg: #f7f8fb; --card:#fff; --border:#e6e8ef; --dashed:#e5e7eb; --text:#0f172a; --text-strong:#0b1220; --text-on-accent:#fff; --muted:#64748b;
+      --accent:#2563eb; --accent-600:#1d4ed8;
+      --chip-bg:#f3f4f6; --chip-border:#d1d5db; --chip-selected-bg:#dbeafe; --chip-selected-border:#93c5fd;
+      --input-bg:#f8fafc; --tag-bg:#f3f4f8; --tag-border:#dfe3ea;
+      --banner-bg:#fff1f2; --banner-border:#fecaca; --banner-dot:#ef4444; --banner-text:#991b1b;
+      --ok:#16a34a; --err:#dc2626; --shadow:0 8px 24px rgba(15,23,42,.08);
     }
-
-    /* halo que expande e desvanece */
-    .group-banner .dot::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: var(--banner-dot);
-    opacity: .40;
-    transform: scale(1);
-    filter: blur(.2px);            /* deixa o halo mais macio */
-    z-index: -1;
-    animation: pulseHalo 1.8s ease-out infinite;
+    :root[data-theme="dark"] {
+      --bg:#0b0b0c; --card:#151518; --border:#2a2a2e; --dashed:#2a2a2e; --text:#e8e8ea; --text-strong:#f6f7fb; --text-on-accent:#fff; --muted:#a2a2aa;
+      --accent:#5e82ff; --accent-600:#5173ee;
+      --chip-bg:#23232a; --chip-border:#3a3a44; --chip-selected-bg:#2f3342; --chip-selected-border:#7da0ff;
+      --input-bg:#0f0f13; --tag-bg:#202027; --tag-border:#353540;
+      --banner-bg:#1b1717; --banner-border:#573434; --banner-dot:#ff7777; --banner-text:#ffd4d4;
+      --ok:#7dffa1; --err:#ff7d8a; --shadow:0 8px 30px rgba(0,0,0,.25);
     }
-
-    /* animações */
-    @keyframes pulseDot {
-    0%, 100% { transform: scale(1); }
-    50%      { transform: scale(1.12); }
-    }
-
-    @keyframes pulseHalo {
-    0%   { transform: scale(1);   opacity: .40; }
-    70%  { transform: scale(2.6); opacity: 0;   }
-    100% { transform: scale(2.6); opacity: 0;   }
-    }
-
-    /* acessibilidade: desliga a animação se o usuário preferir menos movimento */
-    @media (prefers-reduced-motion: reduce) {
-    .group-banner .dot,
-    .group-banner .dot::after {
-        animation: none;
-    }
-    }
-
 
     /* =========================
        BASE
@@ -137,7 +105,7 @@
       margin: 0; padding: 24px;
       font: 16px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
       background: var(--bg); color: var(--text);
-      color-scheme: light dark;   /* faz inputs/scrollbars seguirem o tema */
+      color-scheme: light dark;
       transition: background-color .25s ease, color .25s ease;
     }
     .wrap { max-width: 980px; margin: 0 auto; }
@@ -148,6 +116,7 @@
       border-radius: 16px; padding: 18px;
       box-shadow: var(--shadow);
       transition: background-color .25s ease, border-color .25s ease;
+      position: relative; /* para ancorar o botão no canto */
     }
     .section { margin-top: 18px; }
     label.block { display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-strong); }
@@ -196,24 +165,69 @@
       background: var(--banner-bg); border: 1px solid var(--banner-border); border-radius: 12px;
       padding: 10px 12px; margin: 8px 0 12px;
     }
-    .group-banner .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--banner-dot); box-shadow: 0 0 0 4px color-mix(in srgb, var(--banner-dot), transparent 80%); }
+    /* bolinha com pulso */
+    .group-banner .dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--banner-dot);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--banner-dot), transparent 80%);
+      position: relative; z-index: 1;
+      animation: pulseDot 1.8s ease-in-out infinite;
+    }
+    .group-banner .dot::after {
+      content: ""; position: absolute; inset: 0; border-radius: 50%;
+      background: var(--banner-dot); opacity: .40; transform: scale(1); filter: blur(.2px); z-index: -1;
+      animation: pulseHalo 1.8s ease-out infinite;
+    }
+    @keyframes pulseDot { 0%,100%{transform:scale(1)} 50%{transform:scale(1.12)} }
+    @keyframes pulseHalo { 0%{transform:scale(1);opacity:.4} 70%,100%{transform:scale(2.6);opacity:0} }
+    @media (prefers-reduced-motion: reduce) {
+      .group-banner .dot,.group-banner .dot::after { animation: none; }
+    }
     .group-banner .text { font-weight: 700; color: var(--banner-text); }
 
     /* Cards de frete (compactos quando fechados) */
-    .frete-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
-    details.frete-item { border: 1px solid var(--border); border-radius: 14px; background: var(--card); padding: 0; overflow: clip; transition: box-shadow .2s ease, border-color .25s ease, background-color .25s ease; }
+    .frete-grid {
+      display: grid;
+      gap: 10px;                                  /* ↓ menor espaço */
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* ↓ colunas mais estreitas */
+    }
+    details.frete-item { border: 1px solid var(--border); border-radius: 14px; background: var(--card); padding: 0; overflow: clip; transition: box-shadow .2s, border-color .25s, background-color .25s; }
     details.frete-item[open] { grid-column: 1 / -1; box-shadow: var(--shadow); }
-    .frete-summary { list-style: none; outline: none; cursor: pointer; user-select: none; display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-bottom: 1px dashed var(--dashed); min-height: 44px; }
+    .frete-summary {
+      list-style: none; outline: none; cursor: pointer; user-select: none;
+      display: flex; align-items: center; gap: 6px;       /* ↓ gap */
+      padding: 4px 6px;                                   /* ↓ padding */
+      border-bottom: 1px dashed var(--dashed);
+      min-height: 40px;                                   /* ↓ altura */
+    }
     .frete-summary::-webkit-details-marker { display: none; }
     .frete-summary .caret { opacity: .7; transition: transform .2s ease; font-size: 14px; }
     details[open] .frete-summary .caret { transform: rotate(180deg); }
     .frete-tag {
       flex: 1 1 auto; text-align: center; font-weight: 800; color: var(--text-strong);
-      padding: 10px 12px; border-radius: 10px; border: 1px solid var(--tag-border);
+      padding: 8px 10px;                                   /* ↓ padding */
+      border-radius: 10px; border: 1px solid var(--tag-border);
       background: var(--tag-bg); margin: 4px 0; white-space: nowrap;
     }
-    .frete-count { display: none; opacity: .7; font-size: 12px; padding: 2px 8px; border: 1px solid var(--tag-border); border-radius: 999px; background: color-mix(in oklab, var(--card) 92%, #0000); white-space: nowrap; }
-    @media (min-width: 980px) { .frete-count { display: inline-block; } }
+
+    /* contador compacto: só número fechado; completa no aberto */
+    .frete-count {
+      display: inline-block;               /* sempre visível */
+      font-size: 12px;
+      line-height: 1;
+      padding: 2px 6px;                    /* ↓ pílula menor */
+      border: 1px solid var(--tag-border);
+      border-radius: 999px;
+      background: color-mix(in oklab, var(--card) 92%, #0000);
+      white-space: nowrap;
+      opacity: .7;
+    }
+    details[open] .frete-count::after {
+      content: " " attr(data-label);       /* “bairro(s)” vem do JS */
+      opacity: .9;
+      margin-left: 2px;
+    }
+
     .frete-content { padding: 10px; }
 
     /* Chips */
@@ -237,14 +251,49 @@
     /* Textareas */
     textarea {
       width: 100%; min-height: 190px; resize: vertical; padding: 12px 14px;
+      margin-top: 8px;
       background: var(--input-bg); color: var(--text); border: 1px solid var(--border); border-radius: 10px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-      font-size: 14px; transition: box-shadow .15s ease, border-color .15s ease, background-color .25s ease, color .25s ease;
+      font-size: 14px; transition: box-shadow .15s, border-color .15s, background-color .25s, color .25s;
     }
     textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 75%); }
     #in.is-clickpaste:hover { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent), transparent 65%); cursor: pointer; }
 
     .footer { opacity: .7; font-size: 13px; margin-top: 16px; text-align: center; color: var(--muted); }
+
+    /* ===== Toggle minimalista (inversor de tema) ===== */
+    .theme-top-right{
+      position: absolute; right: 12px; top: 10px; z-index: 5;
+    }
+    .theme-switch{
+      --w: 69px;          /* largura do switch */
+      --knob: 26px;       /* diâmetro do knob */
+      --gap: 6px; 
+      width: var(--w); height: 32px; border-radius: 9999px;
+      display: inline-flex; align-items: center; justify-content: space-between;
+      padding: 0 10px; gap: 0;
+      border: 1px solid var(--border);
+      background: var(--card);
+      position: relative; box-shadow: var(--shadow);
+      transition: background-color .2s, border-color .2s, transform .06s;
+    }
+    .theme-switch:hover{ transform: translateY(-1px); background: color-mix(in oklab, var(--card) 90%, #0000); }
+    .theme-switch .icon{ color: var(--muted); opacity: .9; }
+    .theme-switch .sun{ margin-left: 2px; }
+    .theme-switch .moon{ margin-right: 0; }
+    .theme-switch .knob{
+      position: absolute; top: 50%; left: var(--gap);
+      width: var(--knob); height: var(--knob); border-radius: 9999px;
+      background: var(--input-bg); border: 1px solid var(--border);
+      transform: translate(0, -50%);
+      transition: transform .22s ease;
+      z-index: 1;
+    }
+    .theme-switch[aria-pressed="true"] .knob{
+      transform: translate(calc(var(--w) - var(--knob) - (var(--gap) * 2)), -50%);
+    }
+    .theme-switch[aria-pressed="true"] .moon{ color: var(--text-strong); }
+    .theme-switch[aria-pressed="false"] .sun{ color: var(--text-strong); }
   </style>
 </head>
 <body>
@@ -252,12 +301,30 @@
     <h1>Adicionar Frete ao Pedido</h1>
 
     <div class="card">
+      <!-- Botão de tema no canto superior direito -->
+      <div class="theme-top-right">
+        <button id="btnTheme" class="theme-switch" aria-pressed="false"
+                title="Alternar tema (claro/escuro)" aria-label="Alternar tema">
+          <span class="icon sun" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M12 4.5a1 1 0 0 0 1-1V2a1 1 0 1 0-2 0v1.5a1 1 0 0 0 1 1Zm0 17a1 1 0 0 0-1 1V24a1 1 0 1 0 2 0v-1.5a1 1 0 0 0-1-1ZM4.5 12a1 1 0 0 0-1-1H2a1 1 0 1 0 0 2h1.5a1 1 0 0 0 1-1Zm17 0a1 1 0 0 0 1-1H24a1 1 0 1 0 0 2h-1.5a1 1 0 0 0-1-1ZM5.64 5.64a1 1 0 0 0 0-1.41L4.58 3.17a1 1 0 0 0-1.41 1.41l1.06 1.06a1 1 0 0 0 1.41 0Zm12.72 12.72a1 1 0 0 0 0 1.41l1.06 1.06a1 1 0 0 0 1.41-1.41l-1.06-1.06a1 1 0 0 0-1.41 0ZM18.36 5.64a1 1 0 0 0 1.41 0l1.06-1.06A1 1 0 1 0 19.42 3.17L18.36 4.23a1 1 0 0 0 0 1.41ZM5.64 18.36a1 1 0 0 0-1.41 0l-1.06 1.06a1 1 0 1 0 1.41 1.41l1.06-1.06a1 1 0 0 0 0-1.41ZM12 7.5A4.5 4.5 0 1 0 16.5 12 4.51 4.51 0 0 0 12 7.5Z"/>
+            </svg>
+          </span>
+          <span class="icon moon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+              <path d="M21.75 14.3A9.75 9.75 0 1 1 9.7 2.25 8.25 8.25 0 1 0 21.75 14.3Z"/>
+            </svg>
+          </span>
+          <span class="knob" aria-hidden="true"></span>
+        </button>
+      </div>
+
       <!-- BUSCA -->
       <div class="section search-wrap">
         <label class="block" for="search">Buscar bairro</label>
         <div class="search-row">
           <input id="search" class="search-input" type="text" placeholder="Digite parte do nome (ex.: 'rosa', 'nova', 'sant...')" />
-          <button id="btnSearchClear" class="btn ghost" title="Limpar busca">Limpar</button>
+          <button id="btnSearchClear" class="btn ghost" title="Limpar">Limpar</button>
         </div>
         <div id="searchResults" class="search-results">
           <span class="empty">Resultados da busca aparecem aqui.</span>
@@ -269,13 +336,11 @@
       <div class="section">
         <label class="block">Ou selecione pelo valor e escolha o bairro:</label>
 
-        <!-- Grupo: Fretes padrão -->
         <div class="group" role="region" aria-label="Fretes padrão">
-          <div class="group-title">Fretes Padrão</div>
+          <div class="group-title">FRETES PADRÃO</div>
           <div class="frete-grid" id="gridPadrao"></div>
         </div>
 
-        <!-- Grupo: Mediante aprovação gerencial -->
         <div class="group" role="region" aria-label="Fretes mediante aprovação gerencial">
           <div class="group-banner" aria-live="polite">
             <span class="dot" aria-hidden="true"></span>
@@ -300,7 +365,7 @@
           <div id="status" class="row-right"></div>
         </div>
 
-        <textarea id="in" spellcheck="false" placeholder="Cole aqui o texto (ex.: o bloco com Produtos, Descontos e Total do pedido)" title="Clique para colar automaticamente do clipboard"></textarea>
+        <textarea id="in" spellcheck="false" placeholder="Cole aqui o texto (ex.: o bloco com Produtos, Descontos e Total do pedido)"></textarea>
       </div>
 
       <!-- Ações principais -->
@@ -324,7 +389,38 @@
   </div>
 
   <script>
-    // ================= ZONA DE DADOS — Bairros por frete =================
+    // ======== Tema: inicia seguindo o sistema e o botão INVERTE ========
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const btnTheme = document.getElementById('btnTheme');
+
+    // começa seguindo o sistema; ao clicar, deixa de seguir até recarregar
+    let followSystem = true;
+    let currentTheme = prefersDark.matches ? 'dark' : 'light';
+
+    function applyTheme(theme){
+      document.documentElement.setAttribute('data-theme', theme);
+      document.body.style.colorScheme = theme;
+      btnTheme.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+    }
+
+    // aplica tema inicial (do sistema)
+    applyTheme(currentTheme);
+
+    // acompanha mudanças do sistema enquanto não houver clique
+    prefersDark.addEventListener('change', (e) => {
+      if(!followSystem) return;
+      currentTheme = e.matches ? 'dark' : 'light';
+      applyTheme(currentTheme);
+    });
+
+    // clique = inversor de cor (sem salvar preferência)
+    btnTheme.addEventListener('click', () => {
+      followSystem = false;
+      currentTheme = (currentTheme === 'dark') ? 'light' : 'dark';
+      applyTheme(currentTheme);
+    });
+
+    // ============== APP (restante do seu código) ==============
     const BAIRROS_POR_FRETE = {
       "3,00": ["Cariacica Sede","Alice Coutinho","Antonio Ferreira Borges","Prolar","São João Batista","Vila Merlo","Morrinhos","Morro Novo","Mangueiras","Nova Republica","Andorinhas","Areinha"],
       "4,00": ["Ibiapaba","Santa Luzia","Montanha da Esperança","Limão"],
@@ -336,7 +432,6 @@
       "20,00": ["Santa Leopoldinha"]
     };
 
-    // -------- Utilidades/helpers --------
     const brlFmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
     const toNumberBRL = (str) => { const clean = String(str ?? '').replace(/[^\d.,]/g, '').replace(/\./g, '').replace(',', '.'); const n = parseFloat(clean); return Number.isFinite(n) ? n : NaN; };
     const toBRL = (num) => brlFmt.format(num);
@@ -368,16 +463,25 @@
 
     function setStatus(msg, isErr=false) { status.textContent = msg || ''; status.className = isErr ? 'err' : (msg ? 'ok' : ''); }
 
-    // ----- Renderização dos cards (colapsáveis por valor)
     function renderGrid(container, listaFretes) {
       container.innerHTML = '';
       listaFretes.forEach(v => {
         const det = document.createElement('details'); det.className = 'frete-item'; det.id = safeId(v); det.open = false;
+
         const sum = document.createElement('summary'); sum.className = 'frete-summary';
         const caret = document.createElement('span'); caret.className = 'caret'; caret.textContent = '▾';
         const tag = document.createElement('div'); tag.className = 'frete-tag'; tag.textContent = `R$ ${v}`;
-        const count = document.createElement('span'); count.className = 'frete-count'; count.textContent = `${(BAIRROS_POR_FRETE[v] ?? []).length} bairros`;
-        sum.appendChild(caret); sum.appendChild(tag); sum.appendChild(count);
+
+        // contador compacto (só número fechado; “bairro(s)” ao abrir)
+        const qtd = (BAIRROS_POR_FRETE[v] ?? []).length;
+        const count = document.createElement('span');
+        count.className = 'frete-count';
+        count.textContent = String(qtd);
+        count.dataset.label = qtd === 1 ? 'bairro' : 'bairros';
+
+        sum.appendChild(caret);
+        sum.appendChild(tag);
+        sum.appendChild(count);
 
         const content = document.createElement('div'); content.className = 'frete-content';
         const list = document.createElement('div'); list.className = 'chips-list';
@@ -392,7 +496,6 @@
       });
     }
 
-    // ----- Índice de busca
     const INDEX = [];
     Object.entries(BAIRROS_POR_FRETE).forEach(([freteStr, bairros]) => {
       const freteNum = toNumberBRL(freteStr);
@@ -432,17 +535,26 @@
     searchInput.addEventListener('input', doSearch);
     btnSearchClr.addEventListener('click', () => { searchInput.value = ''; doSearch(); searchInput.focus(); });
 
-    // -------- Processamento do texto --------
     function inserirOuAtualizarFrete(texto, valorFreteBR) {
       if (!Number.isFinite(valorFreteBR)) throw new Error('Frete inválido.');
-      const linhas = texto.split(/\r?\n/);
+      const linhas = String(texto).split(/\r?\n/);
       let descontosIdx = -1; const filtradas = [];
-      for (let i = 0; i < linhas.length; i++) { const line = linhas[i]; if (/^\s*Descontos\b/i.test(line)) descontosIdx = filtradas.length; if (/^\s*Frete\b/i.test(line)) continue; filtradas.push(line); }
-      let totalIdx = filtradas.findIndex(l => /Total do pedido\b/i.test(l)); if (totalIdx === -1) throw new Error('Não encontrei a linha "Total do pedido".');
-      const totalMatch = filtradas[totalIdx].match(/R\$\s*([\d\.\,]+)/i); if (!totalMatch) throw new Error('Não consegui ler o valor de "Total do pedido".');
-      const totalAtual = toNumberBRL(totalMatch[1]); if (!Number.isFinite(totalAtual)) throw new Error('Valor de "Total do pedido" inválido.');
-      const novoTotal = totalAtual + valorFreteBR; const freteLinha = `  Frete    .......................: ${toBRL(valorFreteBR)}`;
-      if (descontosIdx !== -1) { filtradas.splice(descontosIdx + 1, 0, freteLinha); if (descontosIdx + 1 <= totalIdx) totalIdx++; } else { filtradas.splice(totalIdx, 0, freteLinha); totalIdx++; }
+      for (let i = 0; i < linhas.length; i++) {
+        const line = linhas[i];
+        if (/^\s*Descontos\b/i.test(line)) descontosIdx = filtradas.length;
+        if (/^\s*Frete\b/i.test(line)) continue;
+        filtradas.push(line);
+      }
+      let totalIdx = filtradas.findIndex(l => /Total do pedido\b/i.test(l));
+      if (totalIdx === -1) throw new Error('Não encontrei a linha "Total do pedido".');
+      const totalMatch = filtradas[totalIdx].match(/R\$\s*([\d\.\,]+)/i);
+      if (!totalMatch) throw new Error('Não consegui ler o valor de "Total do pedido".');
+      const totalAtual = toNumberBRL(totalMatch[1]);
+      if (!Number.isFinite(totalAtual)) throw new Error('Valor de "Total do pedido" inválido.');
+      const novoTotal = totalAtual + valorFreteBR;
+      const freteLinha = `  Frete    .......................: ${toBRL(valorFreteBR)}`;
+      if (descontosIdx !== -1) { filtradas.splice(descontosIdx + 1, 0, freteLinha); if (descontosIdx + 1 <= totalIdx) totalIdx++; }
+      else { filtradas.splice(totalIdx, 0, freteLinha); totalIdx++; }
       filtradas[totalIdx] = filtradas[totalIdx].replace(/R\$\s*[\d\.\,]+/i, toBRL(novoTotal));
       return filtradas.join('\n');
     }
@@ -467,7 +579,6 @@
       try { await navigator.clipboard.writeText(val); copySt.textContent = 'Copiado!'; } catch { outEl.select(); document.execCommand('copy'); copySt.textContent = 'Copiado!'; }
     });
 
-    // ======= Colagem: toggle + botão + clique controlados =======
     const isSecure = window.isSecureContext;
     let autoPasteEnabled = localStorage.getItem('autoPaste') === '1';
     let autoPasteTriedThisSession = false;
@@ -486,8 +597,10 @@
       if (autoPasteToggle.checked) {
         const ok = await requestClipboardOnce();
         if (ok) { autoPasteEnabled = true; localStorage.setItem('autoPaste','1'); inEl.classList.add('is-clickpaste'); setStatus('Colagem automática ativada.'); }
-        else { autoPasteToggle.checked = false; autoPasteEnabled = false; localStorage.setItem('autoPaste','0'); setStatus(isFileProtocol ? 'Para a permissão lembrar, prefira abrir via http://localhost.' : 'Permissão negada. Não consegui ativar.', true); }
-      } else { autoPasteEnabled = false; localStorage.setItem('autoPaste','0'); inEl.classList.remove('is-clickpaste'); setStatus('Colagem automática desativada.'); }
+        else { autoPasteToggle.checked = false; autoPasteEnabled = false; localStorage.setItem('autoPaste','0'); setStatus(location.protocol==='file:' ? 'Para a permissão lembrar, prefira abrir via http://localhost.' : 'Permissão negada. Não consegui ativar.', true); }
+      } else {
+        autoPasteEnabled = false; localStorage.setItem('autoPaste','0'); inEl.classList.remove('is-clickpaste'); setStatus('Colagem automática desativada.');
+      }
     });
 
     btnPaste.addEventListener('click', async () => {
@@ -501,14 +614,12 @@
       autoPasteTriedThisSession = true;
       const ok = await requestClipboardOnce();
       if (ok) { try { const txt = await navigator.clipboard.readText(); if (txt && txt.trim()) { inEl.value = txt; setStatus('Texto colado da área de transferência.'); } } catch {} }
-      else if (isFileProtocol) setStatus('Para não pedir permissão toda hora, abra via http://localhost.', true);
+      else if (location.protocol==='file:') setStatus('Para não pedir permissão toda hora, abra via http://localhost.', true);
     });
 
-    // Render inicial
     renderGrid(gridPadrao, FRETES_PADRAO);
     renderGrid(gridAprov, FRETES_APROVACAO);
 
-    // Busca
     inEl.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); btnAdd.click(); } });
   </script>
 </body>
