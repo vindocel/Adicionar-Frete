@@ -552,7 +552,7 @@
       const totalAtual = toNumberBRL(totalMatch[1]);
       if (!Number.isFinite(totalAtual)) throw new Error('Valor de "Total do pedido" inválido.');
       const novoTotal = totalAtual + valorFreteBR;
-      const freteLinha = `  Frete    .......................: ${toBRL(valorFreteBR)}`;
+      const freteLinha = `  *Frete    .......................: ${toBRL(valorFreteBR)}*`;
       if (descontosIdx !== -1) { filtradas.splice(descontosIdx + 1, 0, freteLinha); if (descontosIdx + 1 <= totalIdx) totalIdx++; }
       else { filtradas.splice(totalIdx, 0, freteLinha); totalIdx++; }
       filtradas[totalIdx] = filtradas[totalIdx].replace(/R\$\s*[\d\.\,]+/i, toBRL(novoTotal));
@@ -624,3 +624,4 @@
   </script>
 </body>
 </html>
+
