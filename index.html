@@ -73,7 +73,7 @@
         --banner-text: #ffd4d4;
 
         --ok: #7dffa1;
-        --err: #ff7d8a;
+        --err: #ff7d8a; 
 
         --shadow: 0 8px 30px rgba(0,0,0,.25);
       }
@@ -183,11 +183,11 @@
     /* Pulsar mais suave só para o coração */
     @keyframes heartPulse {
       0%,100% { transform: scale(1); }
-      50%     { transform: scale(1.01); }  /* ↓ amplitude (antes ~1.12) */
+      50%     { transform: scale(1.01); }
     }
     @keyframes heartHalo {
       0%      { transform: scale(1); opacity: .24; }
-      70%,100%{ transform: scale(2.2); opacity: 0; } /* ↓ “halo” (antes ~2.6) */
+      70%,100%{ transform: scale(2.2); opacity: 0; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -274,7 +274,7 @@
     .footer {
       opacity: .7;
       font-size: 13px;
-      margin: 16px 0 8px;          /* metade embaixo */
+      margin: 16px 0 8px;
       text-align: center;
       color: var(--muted);
     }
@@ -284,7 +284,7 @@
       margin-left: 6px;
       vertical-align: -2px;
       position: relative;
-      color: var(--banner-dot);              /* mesma cor da bolinha */
+      color: var(--banner-dot);
       animation: heartPulse 2.0s ease-in-out infinite;
     }
     .footer .heart::after{
@@ -305,8 +305,8 @@
       position: absolute; right: 12px; top: 10px; z-index: 5;
     }
     .theme-switch{
-      --w: 69px;          /* largura do switch */
-      --knob: 26px;       /* diâmetro do knob */
+      --w: 69px;
+      --knob: 26px;
       --gap: 6px; 
       width: var(--w); height: 32px; border-radius: 9999px;
       display: inline-flex; align-items: center; justify-content: space-between;
@@ -599,6 +599,38 @@
       return filtradas.join('\n');
     }
 
+    // ===== Função de RESET GERAL (como F5) =====
+    function resetAll() {
+      inEl.value = '';
+      outEl.value = '';
+      copySt.textContent = '';
+      setStatus('');
+
+      selectedFrete = null;
+      selectedBairro = null;
+
+      // Reabilita e desmarca todos os chips
+      document.querySelectorAll('.chip').forEach(c => {
+        c.disabled = false;
+        c.setAttribute('aria-pressed', 'false');
+      });
+      updateSelectionHint();
+
+      // Mantém o destaque de colagem automática conforme preferência
+      inEl.classList.toggle('is-clickpaste', autoPasteEnabled);
+
+      // Fecha todas as gavetas de frete
+      document.querySelectorAll('details.frete-item[open]').forEach(d => d.open = false);
+
+      // Limpa a busca e resultados
+      searchInput.value = '';
+      doSearch();
+
+      // Reseta tentativa de auto-paste por sessão
+      autoPasteTriedThisSession = false;
+    }
+
+    // ===== Handlers =====
     btnAdd.addEventListener('click', () => {
       copySt.textContent = '';
       try {
@@ -609,14 +641,20 @@
     });
 
     btnClear.addEventListener('click', () => {
-      inEl.value = ''; outEl.value = ''; copySt.textContent = ''; setStatus('');
-      selectedFrete = null; selectedBairro = null; document.querySelectorAll('.chip').forEach(c => { c.disabled = false; c.setAttribute('aria-pressed','false'); }); updateSelectionHint();
-      inEl.classList.toggle('is-clickpaste', autoPasteEnabled);
+      resetAll();
     });
 
     btnCpy.addEventListener('click', async () => {
-      const val = outEl.value; if (!val.trim()) { copySt.textContent = 'Nada para copiar.'; return; }
-      try { await navigator.clipboard.writeText(val); copySt.textContent = 'Copiado!'; } catch { outEl.select(); document.execCommand('copy'); copySt.textContent = 'Copiado!'; }
+      const val = outEl.value;
+      if (!val.trim()) { copySt.textContent = 'Nada para copiar.'; return; }
+      try {
+        await navigator.clipboard.writeText(val);
+        resetAll();
+      } catch {
+        outEl.select();
+        document.execCommand('copy');
+        resetAll();
+      }
     });
 
     const isSecure = window.isSecureContext;
